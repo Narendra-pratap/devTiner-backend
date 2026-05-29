@@ -1,6 +1,7 @@
 const express=require("express");
 const app=express();
 const connectDB=require("./config/database");
+const User=require("./models/User");
 connectDB().then(()=>{
     console.log("database connected successfull");
     app.listen(3000,()=>{
