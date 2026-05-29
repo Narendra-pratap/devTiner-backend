@@ -86,7 +86,24 @@ app.get("/feed", async (req, res) => {
     }
 })
 
+//delete user from the database;
+app.delete("/user/:id", async (req, res) => {
+    try {
 
+        const user = await User.findByIdAndDelete(req.params.id);
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        return res.status(200).send(
+            `${user.firstName} deleted successfully`
+        );
+
+    } catch (err) {
+        return res.status(500).send("Error: " + err.message);
+    }
+});
 
 
 
