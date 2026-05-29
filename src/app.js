@@ -15,7 +15,7 @@ connectDB().then(() => {
 }).catch((err) => {
     console.log("ERROR:", err.message);
 })
-// register user
+// sign up api
 app.post("/signup", async (req, res) => {
     try {
         signUpDataValidation(req);
@@ -36,6 +36,57 @@ app.post("/signup", async (req, res) => {
 
 
 })
-app.get("/", (req, res) => {
-    res.send("Welcome to home page");
+
+// get user by email
+app.get("/user", async (req, res) => {
+
+    try {
+
+        const email = req.query.emailId;
+
+        const user = await User.findOne({ emailId: email });
+
+        if (!user) {
+            return res.status(404).send("User not found");
+        }
+
+        return res.status(200).send(user);
+
+    } catch (err) {
+
+        res.status(500).send("Error: " + err.message);
+    }
+
+});
+
+//get user by id;
+app.get("/user/:id", async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).send("USER NOT FOUND");
+        }
+        return res.status(200).send(user);
+    } catch (err) {
+        if (err.name == "CastError") {
+            return res.status(400).send("invalid user id");
+        }
+        return res.status(500).send("Error:" + err.message);
+    }
 })
+// get user /feed
+app.get("/feed", async (req, res) => {
+    try {
+        const user = await User.find({});
+        return res.status(200).send(user);
+    } catch (err) {
+        return res.status(500).send("Error:" + err.message);
+    }
+})
+
+
+
+
+
