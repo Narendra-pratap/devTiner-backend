@@ -67,6 +67,38 @@ app.post("/signup", async (req, res) => {
     }
 });
 
+//login api
+app.post("/login", async (req, res) => {
+    try {
+        const { emailId, password } = req.body;
+        if (!emailId || !password) {
+            return res.status(400).send({
+                message: "Email and Password are required"
+            });
+
+        }
+        const user = await User.findOne({ emailId: emailId });
+        if (!user) {
+            return res.status(401).send({
+                message: "Invalid Credentials"
+            })
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).send({
+                message: "Invalid Credentials"
+            });
+        }
+
+        return res.status(200).send({
+            message: "User LoggedIn Successfully."
+        });
+    } catch (err) {
+        return res.status(500).send({
+            message: "server side errror"
+        })
+    }
+})
 
 
 
