@@ -3,6 +3,7 @@ const app = express();
 const connectDB = require("./config/database");
 const User = require("./models/User");
 const signUpDataValidation = require("./utilis/validation");
+const bcrypt = require("bcryptjs");
 
 
 //middleware call
@@ -18,24 +19,56 @@ connectDB().then(() => {
 // sign up api
 app.post("/signup", async (req, res) => {
     try {
+
+        // API validation
         signUpDataValidation(req);
-        const user = new User(req.body);
+
+        const { firstName, lastName, emailId, password } = req.body;
+
+        // Hash password
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        // Create user
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password: hashPassword
+        });
+
         await user.save();
-        return res.status(201).send(
-            `${req.body.firstName} your account created successfully`
-        );
+
+        return res.status(201).send({
+            message: "User created successfully"
+        });
 
     } catch (err) {
+
+        console.log(err);
+
+        // Duplicate email
         if (err.code === 11000) {
-            return res.status(409).send(
-                `user already exists with ${req.body.emailId}`
-            );
+            return res.status(409).send({
+                message: "Email already exists"
+            });
         }
-        res.status(400).send("Error:" + err.message);
+
+        // Mongoose validation error
+        if (err.name === "ValidationError") {
+            return res.status(400).send({
+                message: err.message
+            });
+        }
+
+        // Unexpected error
+        return res.status(500).send({
+            message: "Internal Server Error"
+        });
     }
+});
 
 
-})
+
 
 // get user by email
 app.get("/user", async (req, res) => {
@@ -104,6 +137,22 @@ app.delete("/user/:id", async (req, res) => {
         return res.status(500).send("Error: " + err.message);
     }
 });
+
+app.patch("/user/:id", (req, res) => {
+    try {
+        const allowUpdates = ["about", "skills", "photoUrl", "password"];
+        const data = req.body;
+        object
+        const userId = req.params.id;
+
+        const user = User.findByIdAndUpdate({ _id: userId });
+
+
+
+    } catch (err) {
+
+    }
+})
 
 
 
